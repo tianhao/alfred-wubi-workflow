@@ -1,6 +1,6 @@
 # 五笔 workflow
 
-本 workflow 是从 http://www.chaiwubi.com/bmcx 获取拆字信息的，感谢www.chaiwubi.com 站点。
+本 workflow 是从 http://www.chaiwubi.com/bmcx 获取拆字信息的，感谢 [拆五笔](www.chaiwubi.com) 站点。
 
 [下载](https://github.com/tianhao/alfred-wubi-workflow/raw/master/wubi.alfredworkflow)
 
