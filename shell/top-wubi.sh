@@ -8,9 +8,9 @@ echo "{\"items\":["
 n=0
 while read line
 do
-    echo "{\"title\":\"${line}\", \"arg\": \"${line}\", ${subtitle}}"
+    echo "{\"title\":\"${line}\", \"arg\": \"${line}\", ${subtitle}},"
     n=$((n+1))
-done < <(sort -rg ${HOME}/Documents/wubi_workflow/${default_version}_top.txt | head -100 | cut -d" " -f 2)
+done < <(sort -rg ${HOME}/Documents/wubi_workflow/${default_version}_top.txt | egrep -v '^$' | head -100 | cut -d" " -f 2)
 
 if [ ${n} -eq 0 ]; then
     echo "{\"title\":\"没有历史记录\", ${subtitle}}"

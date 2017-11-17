@@ -18,8 +18,10 @@ chai_word(){
         echo ${cache#${current_word}:}
         new_val=$(egrep "[[:digit:]]* ${current_word}" ${current_version}_top.txt | awk '{print $1+1" "$2}')
         sed -i ".bak" "s/[[:digit:]]* ${current_word}/${new_val}/g" ${current_version}_top.txt
+        rm -f *_top.txt.bak
         return
     fi
+    local line=""
     while read line;
     do
         htmlInfo+=("${line}")
@@ -103,40 +105,53 @@ chai_line(){
     while [ ${i} -lt ${max} ]
     do
         current_word="${line:${i}:1}"
-        index=$(echo ${lineF/${word}//} | cut -d/ -f1 | wc -m)
+        index=$(echo ${line/${current_word}//} | cut -d/ -f1 | wc -m)
         if [ ${index} -ge ${i} -a $(is_chinese ${current_word}) -gt 0 ];then # 没有拆过且为中文
             chai_word ${default_version} ${current_word}
-            if [ ${BOTH_VERSION:-0}  -eq 1 ];then
+            if [ ${BOTH_VERSION:-0} -eq 1 ];then
                 chai_word ${other_version} ${current_word}
             fi
         fi
         i=$((i+1))
-        if [ ${i} -gt 10 ]; then
-            exit
-        fi
     done
 }
 
 ## 拆一个文件
 chai_file(){
     local file="$*"
+    local lineF=""
     if [ ! -f "${file}" ]; then
+        echo "文件不存在: ${file}"
         exit
     fi
+    local x=0
     while read lineF
     do
-        chai_line "$lineF"
+        x=$((x+1))
+        if [ ${x} -lt 10 ];then
+            chai_line "${lineF}" &
+        else
+            chai_line "${lineF}"
+        fi
     done < <(LC_ALL=UTF-8 sed "s/[[:alnum:][:punct:]]*//g" "${file}")
 }
 
+open_markdown(){
+    if [ -f "${HOME}/Documents/wubi_workflow/${default_version}.md" ];then
+        open ${HOME}/Documents/wubi_workflow/${default_version}.md
+    fi
+}
+
+PATH=$PATH:/usr/local/bin
 default_version=${WUBI_VERSION:-98}
 if [ "${default_version}" = "98" ]; then
     other_version=86
 else
     other_version=98
 fi
-BOTH_VERSION=${BOTH_VERSION:-1}
-if [ ! -f "inited" ];then
+BOTH_VERSION=${BOTH_VERSION:-0}
+if [ ! -f "${HOME}/Documents/wubi_workflow/inited" ];then
+    mkdir -p ${HOME}/Documents/wubi_workflow
     pushd ${HOME}/Documents/wubi_workflow >/dev/null
     mkdir -p ${HOME}/Documents/wubi_workflow/98_img
     mkdir -p ${HOME}/Documents/wubi_workflow/98_img_md
@@ -155,5 +170,5 @@ if [ ! -f "inited" ];then
     echo "| 字 | 图解 | 字根输入 |" >> 86.md
     echo "| --- | --- | --- |" >> 86.md
     touch inited
-    popd
+    popd >/dev/null
 fi
