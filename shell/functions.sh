@@ -70,21 +70,21 @@ chai_word(){
         local l=0
         output="{\"title\":\"${current_word} => ${title}\",\"subtitle\": \"五笔版本: ${current_version}\"},"
         if [ $(convert ${current_version}_img_sp/${current_word}_0.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:0:1}\", \"icon\": {\"type\": \"file\", \"path\": \"$PWD/${current_version}_img_sp/${current_word}_0.png\"}},"
+            output="${output}{\"title\":\"${ma:0:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_0.png\"}},"
             l="25%x100%";
         fi
         if [ $(convert ${current_version}_img_sp/${current_word}_1.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:1:1}\", \"icon\": {\"type\": \"file\", \"path\": \"$PWD/${current_version}_img_sp/${current_word}_1.png\"}},"
+            output="${output}{\"title\":\"${ma:1:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_1.png\"}},"
             l="50%x100%";
         fi
         if [ $(convert ${current_version}_img_sp/${current_word}_2.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:2:1}\", \"icon\": {\"type\": \"file\", \"path\": \"$PWD/${current_version}_img_sp/${current_word}_2.png\"}},"
+            output="${output}{\"title\":\"${ma:2:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_2.png\"}},"
             l="75%x100%";
         else
             rm ${current_version}_img_sp/${current_word}_2.png
         fi
         if [ $(convert ${current_version}_img_sp/${current_word}_3.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:3:1}\", \"icon\": {\"type\": \"file\", \"path\": \"$PWD/${current_version}_img_sp/${current_word}_3.png\"}},"
+            output="${output}{\"title\":\"${ma:3:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_3.png\"}},"
             l="100%x100%"; rmx="${current_version}_img_md/${current_word}_x.png"
         else
             rm ${current_version}_img_sp/${current_word}_3.png
