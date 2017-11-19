@@ -108,7 +108,7 @@ chai_line(){
         index=$(echo ${line/${current_word}//} | cut -d/ -f1 | wc -m)
         if [ ${index} -ge ${i} -a $(is_chinese ${current_word}) -gt 0 ];then # 没有拆过且为中文
             chai_word ${default_version} ${current_word}
-            if [ ${BOTH_VERSION:-0} -eq 1 ];then
+            if [ ${BOTH_VERSION} -eq 1 ];then
                 chai_word ${other_version} ${current_word}
             fi
         fi
@@ -128,7 +128,7 @@ chai_file(){
     while read lineF
     do
         x=$((x+1))
-        if [ ${x} -lt 10 ];then
+        if [ ${x} -lt 20 ];then
             chai_line "${lineF}" &
         else
             chai_line "${lineF}"
