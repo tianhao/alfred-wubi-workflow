@@ -104,9 +104,11 @@ chai_line(){
     local max=${#line}
     while [ ${i} -lt ${max} ]
     do
-        current_word="${line:${i}:1}"
+        local current_word="${line:${i}:1}"
         index=$(echo ${line/${current_word}//} | cut -d/ -f1 | wc -m)
         if [ ${index} -ge ${i} -a $(is_chinese ${current_word}) -gt 0 ];then # 没有拆过且为中文
+            sed -i".bak" "/${current_word}/d" his.txt
+            echo ${current_word} >> his.txt
             chai_word ${default_version} ${current_word}
             if [ ${BOTH_VERSION} -eq 1 ];then
                 chai_word ${other_version} ${current_word}
@@ -134,6 +136,20 @@ chai_file(){
             chai_line "${lineF}"
         fi
     done < <(LC_ALL=UTF-8 sed "s/[[:alnum:][:punct:]]*//g" "${file}")
+}
+
+show_history(){
+    local word=""
+    echo "{\"items\": ["
+    if [ -f his.txt ];then
+        while read word
+        do
+            echo "{\"title\": \"${word}\", \"autocomplete\":\"${word}\", \"valid\":\"no\"},"
+        done < <(tail -100r his.txt)
+    else
+        echo "{\"title\":\"请输入要拆解的汉字\"}"
+    fi
+    echo "]}"
 }
 
 open_markdown(){
