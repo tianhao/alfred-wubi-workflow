@@ -7,4 +7,6 @@ echo "" > 86_cache.txt
 echo "" > 98_cache.txt
 echo "" > 98_top.txt
 echo "" > 86_top.txt
+echo "" > his.txt
+echo "" > recent.md
 popd
