@@ -4,7 +4,7 @@ source ./functions.sh
 
 pushd ${HOME}/Documents/wubi_workflow >/dev/null
 
-awk '{ sub ("\\\\$", ""); printf "%s", $0 } END { print "" }' his.txt > recent.md
+tail -r his.txt | awk '{ sub ("\\\\$", ""); printf "%s", $0 } END { print "" }' > recent.md
 echo "" >> recent.md
 echo "| 字 | 图解 | 字根输入 |" >> recent.md
 echo "| --- | --- | --- |" >> recent.md
