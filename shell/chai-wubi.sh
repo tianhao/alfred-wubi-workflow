@@ -3,8 +3,8 @@
 source ./functions.sh
 
 subtitle="\"subtitle\": \"五笔版本: ${default_version}\""
-if [ "${default_version}" != "98" -a  "${default_version}" != "86" ]; then
-    echo "{\"items\":[{\"title\":\"WUBI_VERSION 参数设置错误，请设置为86或98\"}]}"
+if [ "${default_version}" != "98" -a "${default_version}" != "86" -a "${default_version}" != "06" ]; then
+    echo "{\"items\":[{\"title\":\"WUBI_VERSION 参数设置错误，请设置为86或98或06\"}]}"
     exit
 fi
 

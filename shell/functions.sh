@@ -21,16 +21,25 @@ chai_word(){
         rm -f *_top.txt.bak
         return
     fi
-    local line=""
-    while read line;
-    do
-        htmlInfo+=("${line}")
-    done < <(curl -XPOST "http://www.chaiwubi.com/bmcx?wz=${current_word}" 2>/dev/null | egrep "的五笔王码${current_version}版.*码|wubi/${current_version}tj" | sed 's#^[[:blank:]]*##g' | sed -e 's/<strong.*">//g' | sed 's#</strong>.*##g' | sed 's#<img.*src="##g' | sed 's#".*##g')
 
+    local line=""
+    if [ "${current_version}" = "06" ];then
+        while IFS= read -r line
+        do
+            htmlInfo+=("${line}")
+        done < <(curl -XPOST "http://www.chaiwubi.com/bmcx?wz=${current_word}" 2>/dev/null | egrep "的五笔大一统新世纪版.*码" | sed 's#^[[:blank:]]*##g' | sed -e 's/<strong.*">//g' | sed 's#</strong>.*##g' | sed 's#<img.*src="##g' | sed 's#".*##g')
+     else
+        while IFS= read -r line
+        do
+            htmlInfo+=("${line}")
+        done < <(curl -XPOST "http://www.chaiwubi.com/bmcx?wz=${current_word}" 2>/dev/null | egrep "的五笔王码${current_version}版.*码|wubi/${current_version}tj" | sed 's#^[[:blank:]]*##g' | sed -e 's/<strong.*">//g' | sed 's#</strong>.*##g' | sed 's#<img.*src="##g' | sed 's#".*##g')
+    fi
+  
     local title=""
     local ma=""
     local sp=""
     local output=""
+
     # 一简
     if [ "${htmlInfo[0]}" != "" ]; then
         htmlInfo[0]=$(echo ${htmlInfo[0]} | tr 'a-z' 'A-Z')
@@ -58,40 +67,46 @@ chai_word(){
         title="${title}${sp}${htmlInfo[3]}₄"
         ma="${htmlInfo[3]}"
     fi
+
     if [ "${ma}" = "" ];then
         output="{\"title\":\"${current_word} => 没有找到该字的拆字信息\"},"
     else
-        # 图片URL
-        if [ "${htmlInfo[4]}" != "" ]; then
-            wget -O ${current_version}_img/${current_word}.png ${htmlInfo[4]} 2>/dev/null
-            convert -crop 25%x100% ${current_version}_img/${current_word}.png ${current_version}_img_sp/${current_word}_%d.png
-        fi
+        if [ "${current_version}" = "06" ];then
+            echo "| ${current_word} | "-" | ${title} |" >> ${current_version}.md
+        else
+            # 图片URL
+            if [ "${htmlInfo[4]}" != "" ]; then
+                wget -O ${current_version}_img/${current_word}.png ${htmlInfo[4]} 2>/dev/null
+                convert -crop 25%x100% ${current_version}_img/${current_word}.png ${current_version}_img_sp/${current_word}_%d.png
+            fi
 
-        local l=0
-        output="{\"title\":\"${current_word} => ${title}\",\"subtitle\": \"五笔版本: ${current_version}\"},"
-        if [ $(convert ${current_version}_img_sp/${current_word}_0.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:0:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_0.png\"}},"
-            l="25%x100%";
+            local l=0
+            output="{\"title\":\"${current_word} => ${title}\",\"subtitle\": \"五笔版本: ${current_version}\"},"
+            if [ $(convert ${current_version}_img_sp/${current_word}_0.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
+                output="${output}{\"title\":\"${ma:0:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_0.png\"}},"
+                l="25%x100%";
+            fi
+            if [ $(convert ${current_version}_img_sp/${current_word}_1.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
+                output="${output}{\"title\":\"${ma:1:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_1.png\"}},"
+                l="50%x100%";
+            fi
+            if [ $(convert ${current_version}_img_sp/${current_word}_2.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
+                output="${output}{\"title\":\"${ma:2:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_2.png\"}},"
+                l="75%x100%";
+            else
+                rm ${current_version}_img_sp/${current_word}_2.png
+            fi
+            if [ $(convert ${current_version}_img_sp/${current_word}_3.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
+                output="${output}{\"title\":\"${ma:3:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_3.png\"}},"
+                l="100%x100%"; rmx="${current_version}_img_md/${current_word}_x.png"
+            else
+                rm ${current_version}_img_sp/${current_word}_3.png
+            fi
+            cp ${current_version}_img/${current_word}.png ${current_version}_img_md/${current_word}.png
+            echo "| ${current_word} | ![](${current_version}_img_md/${current_word}.png) | ${title} |" >> ${current_version}.md
         fi
-        if [ $(convert ${current_version}_img_sp/${current_word}_1.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:1:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_1.png\"}},"
-            l="50%x100%";
-        fi
-        if [ $(convert ${current_version}_img_sp/${current_word}_2.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:2:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_2.png\"}},"
-            l="75%x100%";
-        else
-            rm ${current_version}_img_sp/${current_word}_2.png
-        fi
-        if [ $(convert ${current_version}_img_sp/${current_word}_3.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
-            output="${output}{\"title\":\"${ma:3:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_3.png\"}},"
-            l="100%x100%"; rmx="${current_version}_img_md/${current_word}_x.png"
-        else
-            rm ${current_version}_img_sp/${current_word}_3.png
-        fi
-        cp ${current_version}_img/${current_word}.png ${current_version}_img_md/${current_word}.png
-        echo "| ${current_word} | ![](${current_version}_img_md/${current_word}.png) | ${title} |" >> ${current_version}.md
     fi
+
     echo "1 ${current_word}" >> ${current_version}_top.txt
     echo "${current_word}:${output}" >> ${current_version}_cache.txt
     echo ${output}
@@ -162,9 +177,12 @@ PATH=$PATH:/usr/local/bin
 default_version=${WUBI_VERSION:-98}
 if [ "${default_version}" = "98" ]; then
     other_version=86
+else if if [ "${default_version}" = "06" ]; then
+    other_version=86
 else
     other_version=98
 fi
+
 BOTH_VERSION=${BOTH_VERSION:-0}
 if [ ! -f "${HOME}/Documents/wubi_workflow/inited" ];then
     mkdir -p ${HOME}/Documents/wubi_workflow
@@ -175,16 +193,24 @@ if [ ! -f "${HOME}/Documents/wubi_workflow/inited" ];then
     mkdir -p ${HOME}/Documents/wubi_workflow/86_img
     mkdir -p ${HOME}/Documents/wubi_workflow/86_img_md
     mkdir -p ${HOME}/Documents/wubi_workflow/86_img_sp
+    mkdir -p ${HOME}/Documents/wubi_workflow/06_img
+    mkdir -p ${HOME}/Documents/wubi_workflow/06_img_md
+    mkdir -p ${HOME}/Documents/wubi_workflow/06_img_sp
     touch ${HOME}/Documents/wubi_workflow/98_cache.txt
     touch ${HOME}/Documents/wubi_workflow/86_cache.txt
+    touch ${HOME}/Documents/wubi_workflow/06_cache.txt
     touch ${HOME}/Documents/wubi_workflow/98_top.txt
     touch ${HOME}/Documents/wubi_workflow/86_top.txt
+    touch ${HOME}/Documents/wubi_workflow/06_top.txt
     echo "# 五笔拆字 98 版" > 98.md
     echo "| 字 | 图解 | 字根输入 |" >> 98.md
     echo "| --- | --- | --- |" >> 98.md
     echo "# 五笔拆字 86 版" > 86.md
     echo "| 字 | 图解 | 字根输入 |" >> 86.md
     echo "| --- | --- | --- |" >> 86.md
+    echo "# 五笔拆字 06 版" > 06.md
+    echo "| 字 | 图解 | 字根输入 |" >> 06.md
+    echo "| --- | --- | --- |" >> 06.md
     touch inited
     popd >/dev/null
 fi
