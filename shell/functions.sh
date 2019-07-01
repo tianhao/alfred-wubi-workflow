@@ -71,8 +71,9 @@ chai_word(){
     if [ "${ma}" = "" ];then
         output="{\"title\":\"${current_word} => 没有找到该字的拆字信息\"},"
     else
+        output="{\"title\":\"${current_word} => ${title}\",\"subtitle\": \"五笔版本: ${current_version}\"},"
         if [ "${current_version}" = "06" ];then
-            echo "| ${current_word} | "-" | ${title} |" >> ${current_version}.md
+            echo "| ${current_word} | - | ${title} |" >> ${current_version}.md
         else
             # 图片URL
             if [ "${htmlInfo[4]}" != "" ]; then
@@ -81,7 +82,6 @@ chai_word(){
             fi
 
             local l=0
-            output="{\"title\":\"${current_word} => ${title}\",\"subtitle\": \"五笔版本: ${current_version}\"},"
             if [ $(convert ${current_version}_img_sp/${current_word}_0.png -colorspace RGB -verbose info:| grep "Colors:" | awk '{print $2}') -gt 1 ]; then
                 output="${output}{\"title\":\"${ma:0:1}\", \"icon\": {\"type\": \"file\", \"path\": \"~/Documents/wubi_workflow/${current_version}_img_sp/${current_word}_0.png\"}},"
                 l="25%x100%";
@@ -177,7 +177,7 @@ PATH=$PATH:/usr/local/bin
 default_version=${WUBI_VERSION:-98}
 if [ "${default_version}" = "98" ]; then
     other_version=86
-else if if [ "${default_version}" = "06" ]; then
+elif [ "${default_version}" = "06" ]; then
     other_version=86
 else
     other_version=98
